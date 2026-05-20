@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>System Verification Tool</title>
+<style>
+  body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #0f0f0f;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    gap: 20px;
+  }
+
+  h1 {
+    margin-bottom: 10px;
+  }
+
+  button {
+    padding: 15px 25px;
+    font-size: 18px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    background: white;
+    color: black;
+    transition: 0.2s;
+  }
+
+  button:hover {
+    transform: scale(1.05);
+  }
+
+  .box {
+    margin-top: 20px;
+    padding: 20px;
+    border: 1px solid #333;
+    border-radius: 12px;
+    width: 320px;
+    text-align: center;
+  }
+
+  #reactionBox, #captchaBox {
+    display: none;
+  }
+
+  .fakeBar {
+    width: 100%;
+    height: 20px;
+    background: #222;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-top: 10px;
+  }
+
+  .fakeFill {
+    height: 100%;
+    width: 0%;
+    background: limegreen;
+    transition: 0.2s;
+  }
+
+  .captchaGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    margin-top: 10px;
+  }
+
+  .tile {
+    background: #222;
+    padding: 20px;
+    cursor: pointer;
+    border-radius: 6px;
+    user-select: none;
+  }
+
+  .tile:hover {
+    background: #333;
+  }
+</style>
+</head>
+<body>
+
+<h1>System Verification Tool</h1>
+
+<button onclick="openReaction()">Reaction Time Test</button>
+<button onclick="openCaptcha()">CAPTCHA Verification</button>
+
+<div id="reactionBox" class="box">
+  <h2>Reaction Test</h2>
+  <p>Wait for green… then click FAST.</p>
+  <div class="fakeBar"><div id="fill" class="fakeFill"></div></div>
+  <button onclick="startFake()">Start</button>
+  <p id="reactionText"></p>
+</div>
+
+<div id="captchaBox" class="box">
+  <h2>CAPTCHA</h2>
+  <p>Select all squares that contain a stop sign.</p>
+  <div class="captchaGrid" id="grid"></div>
+  <p id="captchaText"></p>
+</div>
+
+<script>
+function openReaction() {
+  document.getElementById("reactionBox").style.display = "block";
+  document.getElementById("captchaBox").style.display = "none";
+}
+
+function openCaptcha() {
+  document.getElementById("captchaBox").style.display = "block";
+  document.getElementById("reactionBox").style.display = "none";
+  loadCaptcha();
+}
+
+/* ---------------- REACTION (FAKE) ---------------- */
+function startFake() {
+  const fill = document.getElementById("fill");
+  const text = document.getElementById("reactionText");
+
+  fill.style.width = "0%";
+  text.innerText = "Calibrating sensors...";
+
+  setTimeout(() => {
+    text.innerText = "Analyzing reflex patterns...";
+  }, 2000);
+
+  setTimeout(() => {
+    text.innerText = "Waiting for optimal moment...";
+  }, 4000);
+
+  setTimeout(() => {
+    text.innerText = "Connection unstable. Restarting test...";
+    fill.style.width = "0%";
+  }, 7000);
+}
+
+/* ---------------- CAPTCHA (IMPOSSIBLE) ---------------- */
+function loadCaptcha() {
+  const grid = document.getElementById("grid");
+  const text = document.getElementById("captchaText");
+
+  grid.innerHTML = "";
+  text.innerText = "";
+
+  for (let i = 0; i < 9; i++) {
+    const div = document.createElement("div");
+    div.className = "tile";
+
+    div.innerText = Math.random() > 0.5 ? "🚫" : "🛑";
+
+    div.onclick = () => {
+      text.innerText = "Incorrect selection. Try again.";
+      loadCaptcha();
+    };
+
+    grid.appendChild(div);
+  }
+}
+</script>
+
+</body>
+</html>
