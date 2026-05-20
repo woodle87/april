@@ -2,167 +2,155 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<title>System Verification Tool</title>
+<title>Reaction Test</title>
 <style>
   body {
     margin: 0;
-    font-family: Arial, sans-serif;
+    height: 100vh;
     background: #0f0f0f;
     color: white;
+    font-family: Arial;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    height: 100vh;
-    gap: 20px;
+    gap: 30px;
   }
 
   h1 {
-    margin-bottom: 10px;
+    margin: 0;
   }
 
-  button {
-    padding: 15px 25px;
-    font-size: 18px;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-    background: white;
-    color: black;
-    transition: 0.2s;
+  .lights {
+    display: flex;
+    gap: 15px;
   }
 
-  button:hover {
-    transform: scale(1.05);
-  }
-
-  .box {
-    margin-top: 20px;
-    padding: 20px;
-    border: 1px solid #333;
-    border-radius: 12px;
-    width: 320px;
-    text-align: center;
-  }
-
-  #reactionBox, #captchaBox {
-    display: none;
-  }
-
-  .fakeBar {
-    width: 100%;
-    height: 20px;
+  .light {
+    width: 40px;
+    height: 100px;
     background: #222;
     border-radius: 10px;
     overflow: hidden;
-    margin-top: 10px;
+    position: relative;
+    border: 2px solid #333;
   }
 
-  .fakeFill {
-    height: 100%;
-    width: 0%;
-    background: limegreen;
-    transition: 0.2s;
+  .fill {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 0%;
+    background: red;
+    transition: height 0.4s linear;
   }
 
-  .captchaGrid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 6px;
-    margin-top: 10px;
+  .bottomRow {
+    display: flex;
+    gap: 15px;
+    margin-top: 20px;
   }
 
-  .tile {
-    background: #222;
-    padding: 20px;
+  .bottomLight {
+    width: 40px;
+    height: 100px;
+    border-radius: 10px;
+    border: 2px solid #333;
+    background: #111;
+  }
+
+  .ready {
+    color: lime;
+    font-size: 18px;
+  }
+
+  button {
+    padding: 12px 20px;
+    font-size: 16px;
+    border: none;
+    border-radius: 10px;
     cursor: pointer;
-    border-radius: 6px;
-    user-select: none;
   }
 
-  .tile:hover {
-    background: #333;
+  #reactBtn {
+    display: none;
+    background: white;
+    color: black;
+  }
+
+  #result {
+    font-size: 20px;
   }
 </style>
 </head>
 <body>
 
-<h1>System Verification Tool</h1>
+<h1>Reaction Time Test</h1>
 
-<button onclick="openReaction()">Reaction Time Test</button>
-<button onclick="openCaptcha()">CAPTCHA Verification</button>
+<div class="lights" id="lights"></div>
+<div class="bottomRow" id="bottomRow"></div>
 
-<div id="reactionBox" class="box">
-  <h2>Reaction Test</h2>
-  <p>Wait for green… then click FAST.</p>
-  <div class="fakeBar"><div id="fill" class="fakeFill"></div></div>
-  <button onclick="startFake()">Start</button>
-  <p id="reactionText"></p>
-</div>
+<button onclick="startTest()">Start</button>
+<button id="reactBtn">CLICK!</button>
 
-<div id="captchaBox" class="box">
-  <h2>CAPTCHA</h2>
-  <p>Select all squares that contain a stop sign.</p>
-  <div class="captchaGrid" id="grid"></div>
-  <p id="captchaText"></p>
-</div>
+<div id="result"></div>
 
 <script>
-function openReaction() {
-  document.getElementById("reactionBox").style.display = "block";
-  document.getElementById("captchaBox").style.display = "none";
+const lights = document.getElementById("lights");
+const bottomRow = document.getElementById("bottomRow");
+const reactBtn = document.getElementById("reactBtn");
+const result = document.getElementById("result");
+
+let startTime;
+let ready = false;
+
+// build lights
+for (let i = 0; i < 5; i++) {
+  const l = document.createElement("div");
+  l.className = "light";
+  l.innerHTML = `<div class="fill"></div>`;
+  lights.appendChild(l);
+
+  const b = document.createElement("div");
+  b.className = "bottomLight";
+  bottomRow.appendChild(b);
 }
 
-function openCaptcha() {
-  document.getElementById("captchaBox").style.display = "block";
-  document.getElementById("reactionBox").style.display = "none";
-  loadCaptcha();
+function startTest() {
+  result.innerText = "";
+  ready = false;
+  reactBtn.style.display = "none";
+
+  const fills = document.querySelectorAll(".fill");
+
+  fills.forEach(f => f.style.height = "0%");
+
+  let i = 0;
+
+  const interval = setInterval(() => {
+    fills[i].style.height = "100%";
+    i++;
+
+    if (i === fills.length) {
+      clearInterval(interval);
+      setTimeout(() => {
+        ready = true;
+        result.innerHTML = "<span class='ready'>READY — CLICK NOW</span>";
+        reactBtn.style.display = "inline-block";
+        startTime = performance.now();
+      }, 800);
+    }
+  }, 600);
 }
 
-/* ---------------- REACTION (FAKE) ---------------- */
-function startFake() {
-  const fill = document.getElementById("fill");
-  const text = document.getElementById("reactionText");
+reactBtn.onclick = () => {
+  if (!ready) return;
 
-  fill.style.width = "0%";
-  text.innerText = "Calibrating sensors...";
-
-  setTimeout(() => {
-    text.innerText = "Analyzing reflex patterns...";
-  }, 2000);
-
-  setTimeout(() => {
-    text.innerText = "Waiting for optimal moment...";
-  }, 4000);
-
-  setTimeout(() => {
-    text.innerText = "Connection unstable. Restarting test...";
-    fill.style.width = "0%";
-  }, 7000);
-}
-
-/* ---------------- CAPTCHA (IMPOSSIBLE) ---------------- */
-function loadCaptcha() {
-  const grid = document.getElementById("grid");
-  const text = document.getElementById("captchaText");
-
-  grid.innerHTML = "";
-  text.innerText = "";
-
-  for (let i = 0; i < 9; i++) {
-    const div = document.createElement("div");
-    div.className = "tile";
-
-    div.innerText = Math.random() > 0.5 ? "🚫" : "🛑";
-
-    div.onclick = () => {
-      text.innerText = "Incorrect selection. Try again.";
-      loadCaptcha();
-    };
-
-    grid.appendChild(div);
-  }
-}
+  const reaction = performance.now() - startTime;
+  result.innerText = `Reaction time: ${Math.round(reaction)} ms`;
+  ready = false;
+  reactBtn.style.display = "none";
+};
 </script>
 
 </body>
